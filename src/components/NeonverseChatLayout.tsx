@@ -2,9 +2,11 @@
 
 import { useNeonverseChat } from "./useNeonverseChat";
 import { useRef, useState, useEffect } from "react";
-
 export default function NeonverseChatLayout() {
   const { messages, users, username, joined, join, sendMessage, joinError, typingUsers, sendTyping, sendSeen } = useNeonverseChat();
+  const [profilePic, setProfilePic] = useState<string | null>(null);
+  const [showDpMenu, setShowDpMenu] = useState(false);
+  const [dpUploading, setDpUploading] = useState(false);
   const [input, setInput] = useState("");
   const [msg, setMsg] = useState("");
   const [image, setImage] = useState<File | null>(null);
@@ -29,6 +31,53 @@ export default function NeonverseChatLayout() {
         .then(res => res.json())
         .then(setActiveChats);
     }
+  };
+
+  // Fetch profile pic after join
+  useEffect(() => {
+    if (joined && username) {
+      fetch(`/profile-pic?username=${encodeURIComponent(username)}`)
+        .then(res => res.json())
+        .then(data => setProfilePic(data.profilePic))
+        .catch(() => setProfilePic(null));
+    }
+  }, [joined, username]);
+
+  // Change to random AI avatar
+  const handleRandomDp = async () => {
+    if (!username) return;
+    setDpUploading(true);
+    const randomSeed = Math.random().toString(36).substring(2, 10);
+    const url = `https://api.dicebear.com/6.x/adventurer/svg?seed=${randomSeed}`;
+    await fetch('/profile-pic', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, url })
+    });
+    setProfilePic(url);
+    setDpUploading(false);
+    setShowDpMenu(false);
+  };
+
+  // Upload custom DP (as data URL for demo)
+  const handleDpUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!username) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setDpUploading(true);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const url = reader.result as string;
+      await fetch('/profile-pic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, url })
+      });
+      setProfilePic(url);
+      setDpUploading(false);
+      setShowDpMenu(false);
+    };
+    reader.readAsDataURL(file);
   };
 
   // Listen for new chat notification event and show snackbar
@@ -177,8 +226,36 @@ export default function NeonverseChatLayout() {
             </button>
             <div className="text-2xl font-bold text-[#00ffee] tracking-widest drop-shadow-[0_0_8px_#00ffee]">VORTEX</div>
           </div>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#00ffee] to-[#ff0077] border-2 border-[#00ffee]" />
+          <div className="flex items-center gap-3 mb-6 relative">
+            <div className="relative group">
+              <img
+                src={profilePic || `https://api.dicebear.com/6.x/adventurer/svg?seed=${username || 'random'}`}
+                alt="Profile"
+                className="w-12 h-12 rounded-full border-2 border-[#00ffee] bg-[#23232b] object-cover cursor-pointer shadow-[0_0_8px_#00ffee]"
+                onClick={() => setShowDpMenu(v => !v)}
+                style={{ boxShadow: '0 0 8px #00ffee' }}
+              />
+              {/* DP menu */}
+              {showDpMenu && (
+                <div className="absolute left-0 top-14 z-50 bg-[#181824] border-2 border-[#00ffee] rounded-xl shadow-[0_0_16px_#00ffee] p-2 w-44 animate-fade-in-up">
+                  <button
+                    className="w-full text-left px-3 py-2 rounded-lg text-[#00ffee] font-semibold hover:bg-[#00ffee]/10 transition mb-1"
+                    onClick={handleRandomDp}
+                    disabled={dpUploading}
+                  >
+                    {dpUploading ? 'Updating...' : 'Random AI Avatar'}
+                  </button>
+                  <label className="block w-full px-3 py-2 rounded-lg text-[#00ffee] font-semibold hover:bg-[#00ffee]/10 transition cursor-pointer">
+                    Upload Photo
+                    <input type="file" accept="image/*" className="hidden" onChange={handleDpUpload} disabled={dpUploading} />
+                  </label>
+                  <button
+                    className="w-full text-left px-3 py-2 rounded-lg text-gray-400 hover:bg-[#00ffee]/5 transition"
+                    onClick={() => setShowDpMenu(false)}
+                  >Cancel</button>
+                </div>
+              )}
+            </div>
             <div>
               <div className="font-semibold text-white">{username}</div>
               <div className="text-xs text-[#a6ff00]">Online</div>
@@ -233,7 +310,11 @@ export default function NeonverseChatLayout() {
                   setSidebarOpen(false); // close drawer on mobile after selecting
                 }}
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#00ffee] to-[#ff0077] border-2 border-[#00ffee]" />
+                <img
+                  src={profilePic && user === username ? profilePic : `https://api.dicebear.com/6.x/adventurer/svg?seed=${user}`}
+                  alt="DP"
+                  className="w-8 h-8 rounded-full border-2 border-[#00ffee] bg-[#23232b] object-cover"
+                />
                 <div className="flex-1">
                   <div className="text-white font-medium text-sm flex items-center gap-2">
                     {user}
@@ -343,7 +424,11 @@ export default function NeonverseChatLayout() {
         </main>
         {/* Right Sidebar (hide on mobile) */}
         <aside className="hidden sm:flex w-1/4 bg-[#10131a]/80 p-6 flex-col items-center border-l border-cyan-400/10">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#00ffee] to-[#ff0077] border-4 border-[#00ffee] mb-4" />
+          <img
+            src={profilePic || `https://api.dicebear.com/6.x/adventurer/svg?seed=${username || 'random'}`}
+            alt="Profile"
+            className="w-20 h-20 rounded-full border-4 border-[#00ffee] bg-[#23232b] object-cover mb-4 shadow-[0_0_16px_#00ffee]"
+          />
           <div className="text-white font-semibold text-lg mb-1">{username}</div>
           <div className="text-[#00ffee] text-sm mb-6">Online</div>
           <div className="w-full">
