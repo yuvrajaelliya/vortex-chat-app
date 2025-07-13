@@ -176,7 +176,8 @@ app.get("/", (req, res) => {
     res.send("NEONVERSE Chat Server Running");
 });
 
-const PORT = 4000;
+const PORT = process.env.PORT || 4000; // Render provides process.env.PORT
+
 server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
