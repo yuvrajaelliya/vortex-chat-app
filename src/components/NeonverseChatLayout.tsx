@@ -82,12 +82,14 @@ export default function NeonverseChatLayout() {
 
   // Listen for new chat notification event and show snackbar
   useEffect(() => {
-    const handler = (e: any) => {
+ const handler = (e: any) => {
+
       try {
         const from = e?.detail?.from;
         if (!from) return;
         setActiveChats((prev: string[]) => Array.isArray(prev) && prev.includes(from) ? prev : [...(Array.isArray(prev) ? prev : []), from]);
         setNotification(`New chat started by ${from}`);
+
         setTimeout(() => setNotification(null), 3500);
       } catch (err) {
         // fail silently
