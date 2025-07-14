@@ -1,9 +1,23 @@
+
 'use client';
 
 import { useNeonverseChat } from "./useNeonverseChat";
 import { useRef, useState, useEffect } from "react";
+
 export default function NeonverseChatLayout() {
-  const { messages, users, username, joined, join, sendMessage, joinError, typingUsers, sendTyping, sendSeen } = useNeonverseChat();
+  const {
+    messages,
+    users,
+    username,
+    joined,
+    join,
+    sendMessage,
+    joinError,
+    typingUsers,
+    sendTyping,
+    sendSeen
+  } = useNeonverseChat();
+
   const [profilePic, setProfilePic] = useState<string | null>(null);
   const [showDpMenu, setShowDpMenu] = useState(false);
   const [dpUploading, setDpUploading] = useState(false);
@@ -17,23 +31,12 @@ export default function NeonverseChatLayout() {
   const [showSearch, setShowSearch] = useState(false);
   const [activeChats, setActiveChats] = useState<string[]>([]);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false); // for mobile drawer
-  const [showMenu, setShowMenu] = useState(false); // for 3-dot menu
-  const showJoin = !joined;
-
-  // --- Notification Snackbar State ---
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
 
-  // Fetch chat list after join or refresh
-  const refreshChats = () => {
-    if (joined && username) {
-      fetch(`/chats?username=${encodeURIComponent(username)}`)
-        .then(res => res.json())
-        .then(setActiveChats);
-    }
-  };
+  const showJoin = !joined;
 
-  // Fetch profile pic after join
   useEffect(() => {
     if (joined && username) {
       fetch(`/profile-pic?username=${encodeURIComponent(username)}`)
@@ -43,12 +46,19 @@ export default function NeonverseChatLayout() {
     }
   }, [joined, username]);
 
-  // Change to random AI avatar
+  const refreshChats = () => {
+    if (joined && username) {
+      fetch(`/chats?username=${encodeURIComponent(username)}`)
+        .then(res => res.json())
+        .then(setActiveChats);
+    }
+  };
+
   const handleRandomDp = async () => {
     if (!username) return;
     setDpUploading(true);
-    const randomSeed = Math.random().toString(36).substring(2, 10);
-    const url = `https://api.dicebear.com/6.x/adventurer/svg?seed=${randomSeed}`;
+    const seed = Math.random().toString(36).substring(2, 10);
+    const url = `https://api.dicebear.com/6.x/adventurer/svg?seed=${seed}`;
     await fetch('/profile-pic', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -59,7 +69,6 @@ export default function NeonverseChatLayout() {
     setShowDpMenu(false);
   };
 
-  // Upload custom DP (as data URL for demo)
   const handleDpUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!username) return;
     const file = e.target.files?.[0];
@@ -80,44 +89,36 @@ export default function NeonverseChatLayout() {
     reader.readAsDataURL(file);
   };
 
-  // Listen for new chat notification event and show snackbar
   useEffect(() => {
- const handler = (e: any) => {
-
+    const handler = (e: CustomEvent<{ from: string }>) => {
       try {
         const from = e?.detail?.from;
         if (!from) return;
-        setActiveChats((prev: string[]) => Array.isArray(prev) && prev.includes(from) ? prev : [...(Array.isArray(prev) ? prev : []), from]);
+        setActiveChats(prev => Array.isArray(prev) && prev.includes(from) ? prev : [...(Array.isArray(prev) ? prev : []), from]);
         setNotification(`New chat started by ${from}`);
-
         setTimeout(() => setNotification(null), 3500);
-      } catch (err) {
-        // fail silently
-      }
+      } catch {}
     };
-    if (typeof window !== "undefined") {
-      window.addEventListener("neonverse-new-chat", handler);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('neonverse-new-chat', handler as EventListener);
     }
     return () => {
-      if (typeof window !== "undefined") {
-        window.removeEventListener("neonverse-new-chat", handler);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('neonverse-new-chat', handler as EventListener);
       }
     };
   }, [joined, username]);
 
-  // Show only online users for search
   const handleUserSearch = (q: string) => {
     setSearch(q);
-    if (q.trim().length === 0) {
+    if (q.trim() === '') {
       setSearchResults([]);
       return;
     }
-    // Only search in online users (from state)
     setShowSearch(true);
-    setSearchResults(users.filter((u) => u.toLowerCase().includes(q.toLowerCase()) && u !== username));
+    setSearchResults(users.filter(u => u.toLowerCase().includes(q.toLowerCase()) && u !== username));
   };
 
-  // Handle file/image selection
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -126,14 +127,12 @@ export default function NeonverseChatLayout() {
     }
   };
 
-  // Accessibility: focus input on join
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) join(input.trim());
     setTimeout(() => inputRef.current?.focus(), 100);
   };
 
-  // Send message or image
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser) return;
@@ -154,12 +153,10 @@ export default function NeonverseChatLayout() {
     }
   };
 
-  // Typing indicator
   const handleTyping = () => {
     sendTyping();
   };
 
-  // Seen status: mark all visible messages as seen
   const handleSeen = () => {
     messages.forEach((m, i) => {
       if (m.user !== username && !(m.seenBy || []).includes(username)) {
