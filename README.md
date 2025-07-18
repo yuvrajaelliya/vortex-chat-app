@@ -14,15 +14,14 @@ NEONVERSE is a real-time chat platform with a unique, cyberpunk-inspired neon-gl
 ## Tech Stack
 - **Frontend:** Next.js (TypeScript), Tailwind CSS
 - **Backend:** Node.js, Express, Socket.IO
-- **Database:** MongoDB
-- **Auth:** NextAuth
-- **Storage:** Cloudinary
+- **Database:** filen
+- **Storage:** filen
 
 ## Getting Started
 
-1. Install dependencies:
+1. active the server
    ```bash
-   npm install
+   node server/index.js
    ```
 2. Run the development server:
    ```bash
