@@ -193,7 +193,12 @@ export default function NeonverseChatLayout() {
       <div className="w-full max-w-full sm:max-w-6xl h-[100dvh] sm:h-[600px] rounded-none sm:rounded-2xl shadow-none sm:shadow-2xl flex flex-col sm:flex-row overflow-hidden border-0 sm:border border-cyan-400/10 bg-gradient-to-br from-[#0e0e10] via-[#181824] to-[#0e0e10] relative">
         {/* Mobile Topbar */}
         <div className="flex sm:hidden items-center justify-between px-4 py-3 border-b border-cyan-400/10 bg-[#10131a]/80 z-10">
-          <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-full border border-[#00ffee] bg-[#181824] text-[#00ffee] shadow-[0_0_8px_#00ffee] focus:outline-none focus:ring-2 focus:ring-[#00ffee]">
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-full border border-[#00ffee] bg-[#181824] text-[#00ffee] shadow-[0_0_8px_#00ffee] focus:outline-none focus:ring-2 focus:ring-[#00ffee]"
+            aria-label="Open sidebar menu"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
@@ -204,7 +209,13 @@ export default function NeonverseChatLayout() {
         {/* Sidebar (Drawer on mobile) */}
         <aside className={`fixed sm:static top-0 left-0 h-full z-30 bg-[#10131a]/95 p-6 flex flex-col border-r border-cyan-400/10 w-4/5 max-w-xs sm:w-1/4 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0`} style={{boxShadow: sidebarOpen ? '0 0 32px #00ffee99' : undefined}}>
           {/* Close button on mobile */}
-          <button className="sm:hidden absolute top-4 right-4 p-2 rounded-full border border-[#00ffee] bg-[#181824] text-[#00ffee] shadow-[0_0_8px_#00ffee]" onClick={() => setSidebarOpen(false)}>
+          <button
+            type="button"
+            className="sm:hidden absolute top-4 right-4 p-2 rounded-full border border-[#00ffee] bg-[#181824] text-[#00ffee] shadow-[0_0_8px_#00ffee]"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar menu"
+            title="Close sidebar menu"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -213,11 +224,12 @@ export default function NeonverseChatLayout() {
           <div className="flex items-center gap-3 mb-8 relative">
             {/* Refresh button: left of logo on mobile, absolute on desktop */}
             <button
+              type="button"
               className="p-2 rounded-full border border-[#00ffee] bg-[#181824] hover:bg-[#00ffee]/20 text-[#00ffee] shadow-[0_0_8px_#00ffee] transition focus:outline-none focus:ring-2 focus:ring-[#00ffee] sm:absolute sm:right-0 sm:top-0"
               style={{ boxShadow: '0 0 8px #00ffee' }}
               onClick={refreshChats}
-              type="button"
               aria-label="Refresh Chats"
+              title="Refresh Chats"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-5 h-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0A8.003 8.003 0 0012 20a8 8 0 007.938-7" />
@@ -238,9 +250,11 @@ export default function NeonverseChatLayout() {
               {showDpMenu && (
                 <div className="absolute left-0 top-14 z-50 bg-[#181824] border-2 border-[#00ffee] rounded-xl shadow-[0_0_16px_#00ffee] p-2 w-44 animate-fade-in-up">
                   <button
+                    type="button"
                     className="w-full text-left px-3 py-2 rounded-lg text-[#00ffee] font-semibold hover:bg-[#00ffee]/10 transition mb-1"
                     onClick={handleRandomDp}
                     disabled={dpUploading}
+                    aria-label="Set random AI avatar"
                   >
                     {dpUploading ? 'Updating...' : 'Random AI Avatar'}
                   </button>
@@ -249,8 +263,10 @@ export default function NeonverseChatLayout() {
                     <input type="file" accept="image/*" className="hidden" onChange={handleDpUpload} disabled={dpUploading} />
                   </label>
                   <button
+                    type="button"
                     className="w-full text-left px-3 py-2 rounded-lg text-gray-400 hover:bg-[#00ffee]/5 transition"
                     onClick={() => setShowDpMenu(false)}
+                    aria-label="Cancel DP menu"
                   >Cancel</button>
                 </div>
               )}
@@ -270,9 +286,11 @@ export default function NeonverseChatLayout() {
                 onFocus={() => setShowSearch(true)}
               />
               <button
+                type="button"
                 className="px-3 py-1 rounded bg-[#00ffee] text-[#0e0e10] text-xs font-bold shadow-[0_0_8px_#00ffee] hover:bg-[#00ffee]/80 transition"
                 onClick={() => handleUserSearch(search)}
-                type="button"
+                aria-label="Search users"
+                title="Search users"
               >
                 Search
               </button>
@@ -333,9 +351,11 @@ export default function NeonverseChatLayout() {
             </div>
             <div className="flex items-center gap-2 relative">
               <button
+                type="button"
                 className="text-gray-400 hover:text-[#00ffee] text-2xl focus:outline-none"
                 onClick={() => setShowMenu((v) => !v)}
                 aria-label="Open menu"
+                title="Open menu"
               >
                 ...
               </button>
